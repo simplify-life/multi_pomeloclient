@@ -1,30 +1,34 @@
 /**
  * Created by Ximena on 2017/4/25.
  */
-
-Client = require('./PomeloClient');
-
-var gate= {
+"use strict";
+const Client = require('./PomeloClient');
+const gate= {
     host:'127.0.0.1',
     port:4010
 };
 
-var c1 = new Client();
-var c2 = new Client();
-var gateRoute = 'gate.gateHandler.queryEntry';
+const c1 = new Client();
+const c2 = new Client();
+const c3 = new Client();
+const c4 = new Client();
+const gateRoute = 'gate.gateHandler.queryEntry';
+const pomeloConnect = (c,next) => {
+    let msg = {cid:10086,uid:Math.ceil(Math.random()*20000)};
+     c.pomelo.init(gate, () => {
+       c.pomelo.request(gateRoute,msg,(data) => {
+            c.pomelo.init(data,() => {
+                console.log(msg.uid+'连接成功...');
+                if(next) next();
+            })
+        })
+    })
+};
 
-c1.pomelo.init(gate,function () {
-   c1.pomelo.request(gateRoute,{cid:10086,uid:10000},function (data) {
-       console.log(data);
-       c1.pomelo.init(data,function () {
-           console.log('c1连接成功...');
-            c2.pomelo.init(gate,function () {
-                c2.pomelo.request(gateRoute,{cid:10086,uid:10001},function (data) {
-                    c2.pomelo.init(data,function () {
-                        console.log('c2连接成功...');
-                    });
-                })
-            });
+pomeloConnect(c1, () => {
+   pomeloConnect(c2,()=>{
+       pomeloConnect(c3,()=>{
+           pomeloConnect(c4)
        })
    });
 });
