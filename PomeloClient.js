@@ -364,6 +364,13 @@ const PomeloClient = function () {
     };
 
     var processMessage = function (pomelo, msg) {
+        if(typeof msg === 'undefined') {
+            if (typeof cb !== 'function') {
+                return;
+            }
+            cb(msg);
+            return;
+        }
         if (!msg.id) {
             // server push message
             pomelo.emit(msg.route, msg.body);
